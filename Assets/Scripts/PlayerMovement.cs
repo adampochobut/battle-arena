@@ -1,51 +1,75 @@
 using UnityEngine;
-using Unity.Collections;
 using UnityEngine.InputSystem;
+using UnityEngine.AI;
 
 public class PlayerMovement : MonoBehaviour
 {
+    private PlayerControls input;
+    private NavMeshAgent agent;
 
-    [SerializeField] private Rigidbody rb;
-    [SerializeField] private float speed = 5f;
+    [Header("Movement")]
+    [SerializeField] private ParticleSystem clickEffect;
+    [SerializeField] private LayerMask clickableLayers;
+    [SerializeField] private Camera mainCamera;
 
-    private PlayerControls controls;
-    private Vector2 moveInput;
+    private float lookRotationSpeed = 8f;
 
     private void Awake()
     {
-        controls = new PlayerControls();
-
-        controls.Player.Move.performed += ctx => moveInput = ctx.ReadValue<Vector2>();
-        controls.Player.Move.canceled += ctx => moveInput = Vector2.zero;
+        agent = GetComponent<NavMeshAgent>();
+        input = new PlayerControls();
+        input.Player.Move.performed += OnClickPerformed;
     }
 
     private void OnEnable()
     {
-        controls.Player.Enable();
+        if (input != null)
+            input.Enable();
     }
 
     private void OnDisable()
     {
-        controls.Player.Disable();
+        if (input != null)
+            input.Disable();
     }
 
-    private void FixedUpdate()
+    private void OnClickPerformed(InputAction.CallbackContext context)
     {
-        //rotates player movement so it feels natural in isometric
-        Vector3 inputVector = new Vector3(moveInput.x, 0, moveInput.y);
-        Vector3 isoDirection = Quaternion.Euler(0, -45, 0) * inputVector;
+        Vector2 mousePos = Mouse.current.position.ReadValue();
+        ClickToMove(mousePos);
+    }
 
+    private void ClickToMove(Vector2 mousePos)
+    {
+        Debug.Log("WHY1");
 
-        if (isoDirection.sqrMagnitude > 0.01f)
+        if (mainCamera == null || agent == null) return;
+
+        Debug.Log("WHY2");
+
+        Ray ray = mainCamera.ScreenPointToRay(mousePos);
+        if (Physics.Raycast(ray, out RaycastHit hit, 100f, clickableLayers))
         {
-            Quaternion targetRotation = Quaternion.LookRotation(isoDirection);
-            rb.MoveRotation(Quaternion.Slerp(rb.rotation, targetRotation, 10f * Time.fixedDeltaTime));
+            agent.destination = hit.point;
+
+            if (clickEffect != null)
+                Instantiate(clickEffect, hit.point + Vector3.up * 0.1f, clickEffect.transform.rotation);
         }
+    }
 
-        rb.MovePosition(rb.position + isoDirection * speed * Time.fixedDeltaTime);
+    private void Update()
+    {
+        FaceTarget();
+    }
 
-        //prevents infinite momentum buildup
-        rb.linearVelocity = Vector2.zero;
+    private void FaceTarget()
+    {
+        if (!agent.hasPath) return;
 
+        Vector3 direction = (agent.destination - transform.position).normalized;
+        if (direction.sqrMagnitude < 0.01f) return;
+
+        Quaternion lookRotation = Quaternion.LookRotation(new Vector3(direction.x, 0, direction.z));
+        transform.rotation = Quaternion.Slerp(transform.rotation, lookRotation, Time.deltaTime * lookRotationSpeed);
     }
 }
