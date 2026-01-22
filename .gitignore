@@ -1,0 +1,62 @@
+# Unity generated files
+/[Ll]ibrary/
+/[Tt]emp/
+/[Oo]bj/
+/[Bb]uild/
+/[Bb]uilds/
+/[Ll]ogs/
+/[Uu]ser[Ss]ettings/
+
+# Memory captures
+/MemoryCaptures/
+
+# Asset meta data should be tracked, but cache files should not
+/*.pidb
+/*.booproj
+/*.svd
+/*.suo
+/*.tmp
+/*.user
+/*.userprefs
+/*.csproj
+/*.unityproj
+/*.sln
+/*.sdf
+/*.db
+/*.opendb
+
+# Unity3D generated file on crash reports
+sysinfo.txt
+
+# Builds
+*.apk
+*.aab
+*.unitypackage
+
+# Rider
+.idea/
+*.sln.iml
+
+# VS Code
+.vscode/
+
+# Visual Studio
+.vs/
+*.vcxproj*
+
+# OS generated
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# JetBrains
+*.dotCover
+
+# Temp files
+*.orig
+
+# Lock files (optionally track if you manage packages differently)
+packages-lock.json
+
+# Ignore user-specific and sensitive files
+*.env
